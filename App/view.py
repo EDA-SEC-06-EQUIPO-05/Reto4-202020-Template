@@ -43,7 +43,7 @@ operación seleccionada.
 #  Variables
 # ___________________________________________________
 
-servicefile = 'bus_routes_14000.csv'
+servicefile = '201801-2-citibike-tripdata.csv'
 initialStation = None
 recursionLimit = 20000
 
@@ -55,19 +55,15 @@ def printMenu():
     print("*******************************************")
     print("Bienvenido")
     print("1- Inicializar Analizador")
-    print("2- Cargar información de buses de singapur")
+    print("2- Cargar información de rutas de citibike")
     print("3- Calcular componentes conectados")
-    print("4- Establecer estación base:")
-    print("5- Hay camino entre estacion base y estación: ")
-    print("6- Ruta de costo mínimo desde la estación base y estación: ")
-    print("7- Estación que sirve a mas rutas: ")
     print("0- Salir")
     print("*******************************************")
 
 
 def optionTwo():
-    print("\nCargando información de transporte de singapur ....")
-    controller.loadServices(cont, servicefile)
+    print("\nCargando información de rutas de citibike ....")
+    controller.loadTrips(cont)
     numedges = controller.totalConnections(cont)
     numvertex = controller.totalStops(cont)
     print('Numero de vertices: ' + str(numvertex))
@@ -78,37 +74,15 @@ def optionTwo():
 
 
 def optionThree():
+    estacionInicial = input("Inserte la estación de salida: ")
+    estacionFinal = input("Inserte la estación de llegada: ")
     print('El número de componentes conectados es: ' +
           str(controller.connectedComponents(cont)))
-
-
-def optionFour():
-    controller.minimumCostPaths(cont, initialStation)
-
-
-def optionFive():
-    haspath = controller.hasPath(cont, destStation)
-    print('Hay camino entre la estación base : ' +
-          'y la estación: ' + destStation + ': ')
-    print(haspath)
-
-
-def optionSix():
-    path = controller.minimumCostPath(cont, destStation)
-    if path is not None:
-        pathlen = stack.size(path)
-        print('El camino es de longitud: ' + str(pathlen))
-        while (not stack.isEmpty(path)):
-            stop = stack.pop(path)
-            print(stop)
-    else:
-        print('No hay camino')
-
-
-def optionSeven():
-    maxvert, maxdeg = controller.servedRoutes(cont)
-    print('Estación: ' + maxvert + '  Total rutas servidas: '
-          + str(maxdeg))
+    conexion = controller.sameCC(cont, estacionInicial, estacionFinal)
+    if conexion == True:
+        print("La estación "+estacionInicial+" esta conectada fuertemente con la estación "+estacionFinal)
+    elif conexion == False:
+        print("La estación "+estacionInicial+" no esta conectada fuertemente con la estación "+estacionFinal)
 
 
 """
@@ -129,26 +103,6 @@ while True:
 
     elif int(inputs[0]) == 3:
         executiontime = timeit.timeit(optionThree, number=1)
-        print("Tiempo de ejecución: " + str(executiontime))
-
-    elif int(inputs[0]) == 4:
-        msg = "Estación Base: BusStopCode-ServiceNo (Ej: 75009-10): "
-        initialStation = input(msg)
-        executiontime = timeit.timeit(optionFour, number=1)
-        print("Tiempo de ejecución: " + str(executiontime))
-
-    elif int(inputs[0]) == 5:
-        destStation = input("Estación destino (Ej: 15151-10): ")
-        executiontime = timeit.timeit(optionFive, number=1)
-        print("Tiempo de ejecución: " + str(executiontime))
-
-    elif int(inputs[0]) == 6:
-        destStation = input("Estación destino (Ej: 15151-10): ")
-        executiontime = timeit.timeit(optionSix, number=1)
-        print("Tiempo de ejecución: " + str(executiontime))
-
-    elif int(inputs[0]) == 7:
-        executiontime = timeit.timeit(optionSeven, number=1)
         print("Tiempo de ejecución: " + str(executiontime))
 
     else:

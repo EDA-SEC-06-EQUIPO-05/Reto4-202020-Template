@@ -27,6 +27,7 @@
 import config as cf
 from App import model
 import csv
+import os
 
 """
 El controlador se encarga de mediar entre la vista y el modelo.
@@ -46,7 +47,7 @@ def init():
     Llama la funcion de inicializacion  del modelo.
     """
     # analyzer es utilizado para interactuar con el modelo
-    analyzer = model.newAnalyzer()
+    analyzer = model.newAnalyzerC()
     return analyzer
 
 
@@ -77,6 +78,21 @@ def loadServices(analyzer, servicesfile):
     model.addRouteConnections(analyzer)
     return analyzer
 
+def loadTrips(analyzer):
+    for nombre in os.listdir(cf.data_dir):
+        if nombre.endswith(".csv"):
+            loadFiles(analyzer, nombre)
+    return analyzer
+
+def loadFiles(analyzer,archivo):
+    archivo = cf.data_dir + archivo
+    input_archivo = csv.DictReader(open(archivo, encoding="utf-8"),
+                                delimiter=",")
+    for viaje in input_archivo:
+        model.addTrip(analyzer,viaje)
+    return analyzer
+
+
 # ___________________________________________________
 #  Funciones para consultas
 # ___________________________________________________
@@ -102,6 +118,8 @@ def connectedComponents(analyzer):
     """
     return model.connectedComponents(analyzer)
 
+def sameCC(analyzer, est1, est2):
+    return model.mismoCC(analyzer, est1, est2)
 
 def minimumCostPaths(analyzer, initialStation):
     """

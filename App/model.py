@@ -71,7 +71,51 @@ def newAnalyzer():
     except Exception as exp:
         error.reraise(exp, 'model:newAnalyzer')
 
+def newAnalyzerC():
+    """ Inicializa el analizador
+
+   stops: Tabla de hash para guardar los vertices del grafo
+   connections: Grafo para representar las rutas entre estaciones
+   components: Almacena la informacion de los componentes conectados
+   paths: Estructura que almancena los caminos de costo minimo desde un
+           vertice determinado a todos los otros vértices del grafo
+    """
+    try:
+        analyzer = {
+                    'graph': None,
+                    'stops': None,
+                    'connections': None,
+                    'components': None,
+                    'paths': None
+                    }
+
+        analyzer["graph"]= gr.newGraph(datastructure='ADJ_LIST',
+                                              directed=True,
+                                              size=1000,
+                                              comparefunction=comparestations)
+
+        analyzer['stops'] = m.newMap(numelements=14000,
+                                     maptype='PROBING',
+                                     comparefunction=compareStopIds)
+
+        return analyzer
+    except Exception as exp:
+        error.reraise(exp, 'model:newAnalyzerC')
+
 # Funciones para agregar informacion al grafo
+
+def addTrip(analyzer, viaje):
+    origen = viaje["start station id"]
+    destino = viaje["end station id"]
+    duracion = int(viaje["tripduration"])
+    addStation(analyzer, origen)
+    addStation(analyzer, destino)
+    addConnectionC(analyzer, origen, destino, duracion)
+
+def addStation(analyzer, stationID):
+    if not gr.containsVertex(analyzer["graph"], stationID):
+        gr.insertVertex(analyzer["graph"], stationID)
+    return analyzer
 
 def addStopConnection(analyzer, lastservice, service):
     """
@@ -160,6 +204,15 @@ def addConnection(analyzer, origin, destination, distance):
         gr.addEdge(analyzer['connections'], origin, destination, distance)
     return analyzer
 
+def addConnectionC(analyzer, origin, destination, distance):
+    """
+    Adiciona un arco entre dos estaciones
+    """
+    edge = gr.getEdge(analyzer['graph'], origin, destination)
+    if edge is None:
+        gr.addEdge(analyzer["graph"], origin, destination, distance)
+    return analyzer
+
 # ==============================
 # Funciones de consulta
 # ==============================
@@ -168,16 +221,18 @@ def connectedComponents(analyzer):
     Calcula los componentes conectados del grafo
     Se utiliza el algoritmo de Kosaraju
     """
-    analyzer['components'] = scc.KosarajuSCC(analyzer['connections'])
+    analyzer['components'] = scc.KosarajuSCC(analyzer['graph'])
     return scc.connectedComponents(analyzer['components'])
 
+def mismoCC(analyzer, estacion1, estacion2):
+    return scc.stronglyConnected(analyzer["components"], estacion1, estacion2)
 
 def minimumCostPaths(analyzer, initialStation):
     """
     Calcula los caminos de costo mínimo desde la estacion initialStation
     a todos los demas vertices del grafo
     """
-    analyzer['paths'] = djk.Dijkstra(analyzer['connections'], initialStation)
+    analyzer['paths'] = djk.Dijkstra(analyzer['graph'], initialStation)
     return analyzer
 
 
@@ -203,14 +258,14 @@ def totalStops(analyzer):
     """
     Retorna el total de estaciones (vertices) del grafo
     """
-    return gr.numVertices(analyzer['connections'])
+    return gr.numVertices(analyzer['graph'])
 
 
 def totalConnections(analyzer):
     """
     Retorna el total arcos del grafo
     """
-    return gr.numEdges(analyzer['connections'])
+    return gr.numEdges(analyzer['graph'])
 
 
 def servedRoutes(analyzer):
@@ -250,7 +305,7 @@ def cleanServiceDistance(lastservice, service):
 
 def formatVertex(service):
     """
-    Se formatea el nombrer del vertice con el id de la estación
+    Se formatea el nombre del vertice con el id de la estación
     seguido de la ruta.
     """
     name = service['BusStopCode'] + '-'
@@ -283,6 +338,14 @@ def compareroutes(route1, route2):
     if (route1 == route2):
         return 0
     elif (route1 > route2):
+        return 1
+    else:
+        return -1
+
+def comparestations(station1,station2):
+    if (station1 == station2):
+        return 0
+    elif (station1 != station2):
         return 1
     else:
         return -1
