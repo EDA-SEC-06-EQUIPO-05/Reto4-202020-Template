@@ -277,6 +277,7 @@ def getEdge(graph, vertexa, vertexb):
     """
     try:
         element = map.get(graph['vertices'], vertexa)
+        #print(element['value'])
         lst = element['value']
         itvertex = it.newIterator(lst)
         while (it.hasNext(itvertex)):

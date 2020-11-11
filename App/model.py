@@ -42,34 +42,6 @@ de creacion y consulta sobre las estructuras de datos.
 #                       API
 # -----------------------------------------------------
 
-def newAnalyzer():
-    """ Inicializa el analizador
-
-   stops: Tabla de hash para guardar los vertices del grafo
-   connections: Grafo para representar las rutas entre estaciones
-   components: Almacena la informacion de los componentes conectados
-   paths: Estructura que almancena los caminos de costo minimo desde un
-           vertice determinado a todos los otros vértices del grafo
-    """
-    try:
-        analyzer = {
-                    'stops': None,
-                    'connections': None,
-                    'components': None,
-                    'paths': None
-                    }
-
-        analyzer['stops'] = m.newMap(numelements=14000,
-                                     maptype='PROBING',
-                                     comparefunction=compareStopIds)
-
-        analyzer['connections'] = gr.newGraph(datastructure='ADJ_LIST',
-                                              directed=True,
-                                              size=14000,
-                                              comparefunction=compareStopIds)
-        return analyzer
-    except Exception as exp:
-        error.reraise(exp, 'model:newAnalyzer')
 
 def newAnalyzerC():
     """ Inicializa el analizador
@@ -84,7 +56,6 @@ def newAnalyzerC():
         analyzer = {
                     'graph': None,
                     'stops': None,
-                    'connections': None,
                     'components': None,
                     'paths': None
                     }
@@ -92,7 +63,7 @@ def newAnalyzerC():
         analyzer["graph"]= gr.newGraph(datastructure='ADJ_LIST',
                                               directed=True,
                                               size=1000,
-                                              comparefunction=comparestations)
+                                              comparefunction=compareStopIds)
 
         analyzer['stops'] = m.newMap(numelements=14000,
                                      maptype='PROBING',
