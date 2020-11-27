@@ -29,6 +29,7 @@ from DISClib.ADT import map as m
 from DISClib.ADT import list as lt
 from DISClib.DataStructures import listiterator as it
 from DISClib.Algorithms.Graphs import scc
+from DISClib.Algorithms.Graphs import dfs
 from DISClib.Algorithms.Graphs import dijsktra as djk
 from DISClib.Utils import error as error
 assert config
@@ -187,6 +188,50 @@ def addConnectionC(analyzer, origin, destination, distance):
 # ==============================
 # Funciones de consulta
 # ==============================
+def ruta_ciclica(analyzer, estacion):
+    recorrido = scc.KosarajuSCC(analyzer['graph'])
+    
+    #recorrido = dfs.DepthFirstSearch(analyzer['graph'], estacion)
+    i = 0
+    j = 0
+    l = []
+    while i<len(recorrido['idscc']['table']['elements']):
+        if str(recorrido['idscc']['table']['elements'][i]['key']) == str(estacion):
+            v = recorrido['idscc']['table']['elements'][i]['value']
+        i += 1
+    #print(v)
+    while j<len(recorrido['idscc']['table']['elements']):
+        if str(recorrido['idscc']['table']['elements'][j]['value']) == str(v):
+            l.append(str(recorrido['idscc']['table']['elements'][j]['key']))
+        j += 1
+      #      l.append(recorrido['visited']['table']['elements'][i]['key'])
+       # i += 1
+    #print(l)
+    #return recorrido['visited']['table']['elements']
+    #print(recorrido['idscc']['table']['elements'])
+    print(l)
+    k = 0
+    
+    rutas_unicas = []
+    while k<len(l):
+        df = dfs.DepthFirstSearch(analyzer['graph'], l[k])
+        a = 0
+        while a<len(df['visited']['table']['elements']):
+        if estacion == df['visited']['table']['elements'][a]['key']:
+            if df['visited']['table']['elements'][a]['value']['edgeTo'] == df['source']:
+                rutas_unicas.append(df['source'])
+                
+            a += 0
+        
+        
+        print(df)
+        if 
+        k += 1
+    
+    
+    return 'Hola'
+
+
 def connectedComponents(analyzer):
     """
     Calcula los componentes conectados del grafo
