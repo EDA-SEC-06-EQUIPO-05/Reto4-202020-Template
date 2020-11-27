@@ -149,3 +149,8 @@ def servedRoutes(analyzer):
     """
     maxvert, maxdeg = model.servedRoutes(analyzer)
     return maxvert, maxdeg
+
+def criticalStations(analyzer):
+
+    estaciones= model.estacionesCriticas(analyzer)
+    return estaciones

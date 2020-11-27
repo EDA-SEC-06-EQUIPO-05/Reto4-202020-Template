@@ -43,7 +43,7 @@ operación seleccionada.
 #  Variables
 # ___________________________________________________
 
-servicefile = '201801-2-citibike-tripdata.csv'
+servicefile = '201801-5-citibike-tripdata.csv'
 initialStation = None
 recursionLimit = 20000
 
@@ -57,6 +57,7 @@ def printMenu():
     print("1- Inicializar Analizador")
     print("2- Cargar información de rutas de citibike")
     print("3- Calcular componentes conectados")
+    print("5- Buscar estaciones criticas")
     print("0- Salir")
     print("*******************************************")
 
@@ -84,6 +85,11 @@ def optionThree():
     elif conexion == False:
         print("La estación "+estacionInicial+" no esta conectada fuertemente con la estación "+estacionFinal)
 
+def optionFive():
+
+    resultado= controller.criticalStations(cont)
+    print(resultado)
+
 
 """
 Menu principal
@@ -103,6 +109,10 @@ while True:
 
     elif int(inputs[0]) == 3:
         executiontime = timeit.timeit(optionThree, number=1)
+        print("Tiempo de ejecución: " + str(executiontime))
+
+    elif int(inputs[0]) == 5:
+        executiontime = timeit.timeit(optionFive, number=1)
         print("Tiempo de ejecución: " + str(executiontime))
 
     else:
