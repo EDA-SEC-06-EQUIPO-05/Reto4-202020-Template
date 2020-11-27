@@ -27,6 +27,8 @@ import config
 from DISClib.ADT.graph import gr
 from DISClib.ADT import map as m
 from DISClib.ADT import list as lt
+from DISClib.ADT import minpq as pq
+from DISClib.Algorithms.Sorting import selectionsort as sel
 from DISClib.DataStructures import listiterator as it
 from DISClib.Algorithms.Graphs import scc
 from DISClib.Algorithms.Graphs import dfs
@@ -58,7 +60,8 @@ def newAnalyzerC():
                     'graph': None,
                     'stops': None,
                     'components': None,
-                    'paths': None
+                    'connections': None,
+                    'ages': None
                     }
 
         analyzer["graph"]= gr.newGraph(datastructure='ADJ_LIST',
@@ -69,6 +72,15 @@ def newAnalyzerC():
         analyzer['stops'] = m.newMap(numelements=14000,
                                      maptype='PROBING',
                                      comparefunction=compareStopIds)
+
+        analyzer["connections"]= gr.newGraph(datastructure='ADJ_LIST',
+                                              directed=True,
+                                              size=1000,
+                                              comparefunction=compareStopIds)
+
+        analyzer['ages'] = m.newMap(numelements=14000,
+                                     maptype='PROBING',
+                                     comparefunction=compareAges)                
 
         return analyzer
     except Exception as exp:
@@ -83,10 +95,16 @@ def addTrip(analyzer, viaje):
     addStation(analyzer, origen)
     addStation(analyzer, destino)
     addConnectionC(analyzer, origen, destino, duracion)
+    addAges(analyzer, origen)
+    addAges(analyzer, destino)
 
 def addStation(analyzer, stationID):
     if not gr.containsVertex(analyzer["graph"], stationID):
         gr.insertVertex(analyzer["graph"], stationID)
+    return analyzer
+
+def addAges(analyzer, ruta):
+
     return analyzer
 
 def addStopConnection(analyzer, lastservice, service):
@@ -114,7 +132,6 @@ def addStopConnection(analyzer, lastservice, service):
         return analyzer
     except Exception as exp:
         error.reraise(exp, 'model:addStopConnection')
-
 
 def addStop(analyzer, stopid):
     """
@@ -144,7 +161,6 @@ def addRouteStop(analyzer, service):
             lt.addLast(lstroutes, info)
     return analyzer
 
-
 def addRouteConnections(analyzer):
     """
     Por cada vertice (cada estacion) se recorre la lista
@@ -164,6 +180,27 @@ def addRouteConnections(analyzer):
             if prevrout is not None:
                 addConnection(analyzer, prevrout, route, 0)
                 addConnection(analyzer, route, prevrout, 0)
+            prevrout = route
+
+def addRouteConnectionsC(analyzer):
+    """
+    Por cada vertice (cada estacion) se recorre la lista
+    de rutas servidas en dicha estación y se crean
+    arcos entre ellas para representar el cambio de ruta
+    que se puede realizar en una estación.
+    """
+    lststops = m.keySet(analyzer['stops'])
+    stopsiterator = it.newIterator(lststops)
+    while it.hasNext(stopsiterator):
+        key = it.next(stopsiterator)
+        lstroutes = m.get(analyzer['stops'], key)['value']
+        prevrout = None
+        routeiterator = it.newIterator(lstroutes)
+        while it.hasNext(routeiterator):
+            route = key + '-' + it.next(routeiterator)
+            if prevrout is not None:
+                addConnectionC(analyzer, prevrout, route, 0)
+                addConnectionC(analyzer, route, prevrout, 0)
             prevrout = route
 
 
@@ -217,16 +254,16 @@ def ruta_ciclica(analyzer, estacion):
         df = dfs.DepthFirstSearch(analyzer['graph'], l[k])
         a = 0
         while a<len(df['visited']['table']['elements']):
-        if estacion == df['visited']['table']['elements'][a]['key']:
-            if df['visited']['table']['elements'][a]['value']['edgeTo'] == df['source']:
-                rutas_unicas.append(df['source'])
+            if estacion == df['visited']['table']['elements'][a]['key']:
+                if df['visited']['table']['elements'][a]['value']['edgeTo'] == df['source']:
+                    rutas_unicas.append(df['source'])
                 
-            a += 0
+                a += 0
         
         
         print(df)
-        if 
-        k += 1
+        if 1==2:
+            k += 1
     
     
     return 'Hola'
@@ -303,7 +340,47 @@ def servedRoutes(analyzer):
             maxdeg = degree
     return maxvert, maxdeg
 
+def estacionesCriticas(analyzer):
 
+    cuenta= 0
+    estaciones= gr.vertices(analyzer["graph"])
+    listaEntrada= lt.newList("ARRAY_LIST", comparestations)
+    listaSalida= lt.newList("ARRAY_LIST", comparestations)
+    listaSolitarias= lt.newList("ARRAY_LIST", comparestations)
+    entradasConcurridas= lt.newList("ARRAY_LIST", compareSizes)
+    salidasConcurridas= lt.newList("ARRAY_LIST", compareSizes)
+    estacionesSolitarias= lt.newList("ARRAY_LIST", compareSizes)
+    while cuenta<lt.size(estaciones):
+        estacion= lt.getElement(estaciones, cuenta)
+        entrada= gr.indegree(analyzer["graph"], estacion)        
+        lt.addFirst(entradasConcurridas,entrada)
+        salida= gr.outdegree(analyzer["graph"], estacion)
+        lt.addFirst(salidasConcurridas,salida)
+        bidireccional= gr.degree(analyzer["graph"], estacion)
+        lt.addFirst(estacionesSolitarias,bidireccional)
+        cuenta+= 1
+
+    entradasOrg= sel.selectionSort(entradasConcurridas,lessequal)
+    salidasOrg= sel.selectionSort(salidasConcurridas,lessequal)
+    solitariasOrg= sel.selectionSort(estacionesSolitarias,lessequal)
+    print(entradasOrg)
+
+    for conteo in range(0,3):
+        if entrada == lt.getElement(entradasOrg, conteo):
+            lt.insertElement(listaEntrada, estacion, conteo)
+        if salida == lt.getElement(salidasOrg, conteo):
+            lt.insertElement(listaSalida, estacion, conteo)
+        if bidireccional == lt.getElement(solitariasOrg, conteo):
+            lt.insertElement(listaSolitarias, estacion, conteo)
+    if lt.size(listaEntrada) > 3:
+        lt.removeLast(listaEntrada)
+    if lt.size(listaSalida) > 3:
+        lt.removeLast(listaSalida)
+    if lt.size(listaSolitarias) > 3:
+        lt.removeLast(listaSolitarias)
+
+    return (listaEntrada, listaSalida, listaSolitarias)
+    
 # ==============================
 # Funciones Helper
 # ==============================
@@ -366,3 +443,23 @@ def comparestations(station1,station2):
     else:
         return -1
 
+def compareSizes(size1, size2):
+    if (size1 == size2):
+        return 0
+    elif (size1 > size2):
+        return 1
+    else:
+        return -1
+
+def lessequal(a,b):
+
+    return a < b
+
+def compareAges(age1, age2):
+
+    if age1 == age2:
+        return 0
+    elif age1 > age2:
+        return 1
+    else:
+        return -1
