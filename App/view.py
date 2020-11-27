@@ -57,6 +57,7 @@ def printMenu():
     print("1- Inicializar Analizador")
     print("2- Cargar información de rutas de citibike")
     print("3- Calcular componentes conectados")
+    print('4- Calcular la ruta circular')
     print("0- Salir")
     print("*******************************************")
 
@@ -84,7 +85,10 @@ def optionThree():
     elif conexion == False:
         print("La estación "+estacionInicial+" no esta conectada fuertemente con la estación "+estacionFinal)
 
-
+def optionFour():
+    estacionInicial = input("Inserte la estación de salida: ")
+    print(controller.ruta_ciclica(cont, estacionInicial))
+    
 """
 Menu principal
 """
@@ -104,7 +108,9 @@ while True:
     elif int(inputs[0]) == 3:
         executiontime = timeit.timeit(optionThree, number=1)
         print("Tiempo de ejecución: " + str(executiontime))
-
+    elif int(inputs[0]) == 4:
+        executiontime = timeit.timeit(optionFour, number=1)
+        print("Tiempo de ejecución: " + str(executiontime))    
     else:
         sys.exit(0)
 sys.exit(0)

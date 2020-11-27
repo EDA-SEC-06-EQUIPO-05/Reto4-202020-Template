@@ -97,7 +97,9 @@ def loadFiles(analyzer,archivo):
 #  Funciones para consultas
 # ___________________________________________________
 
-
+def ruta_ciclica(analyzer, estacion):
+    return model.ruta_ciclica(analyzer, estacion)
+    
 def totalStops(analyzer):
     """
     Total de paradas de autobus
