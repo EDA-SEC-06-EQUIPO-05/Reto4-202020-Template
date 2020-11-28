@@ -90,7 +90,8 @@ def optionThree():
 
 def optionFour():
     estacionInicial = input("Inserte la estación de salida: ")
-    print(controller.ruta_ciclica(cont, estacionInicial))
+    tiempo = input('Digite el rango de tiempo en minutos (ej:180-240): ')
+    print(controller.ruta_ciclica(cont, estacionInicial, tiempo))
     
 def optionFive():
 
