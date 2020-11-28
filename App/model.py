@@ -141,6 +141,10 @@ def stopAges(analyzer, station, age, ori_des):
     else:
         lstroutes = entry['value']
         lt.addLast(lstroutes, age)
+<<<<<<< HEAD
+=======
+    #print(entry)
+>>>>>>> e87df6b9c6f7a04bbd8b208e8d9d1d486c099ce7
     return analyzer
 
 def stopdirections(analyzer, station, latitude, longitude):
@@ -198,7 +202,8 @@ def addConnectionC(analyzer, origin, destination, distance):
 # ==============================
 # Funciones de consulta
 # ==============================
-def ruta_ciclica(analyzer, estacion):
+
+def ruta_ciclica(analyzer, estacion, tiempo):
     recorrido = scc.KosarajuSCC(analyzer['graph'])
     
     #recorrido = dfs.DepthFirstSearch(analyzer['graph'], estacion)
@@ -219,27 +224,28 @@ def ruta_ciclica(analyzer, estacion):
     #print(l)
     #return recorrido['visited']['table']['elements']
     #print(recorrido['idscc']['table']['elements'])
-    print(l)
+    #print(l)
     k = 0
-    
-    rutas_unicas = []
-    while k<len(l):
+    b = 1
+    while k<len(l) and b<(len(l)-1):
         df = dfs.DepthFirstSearch(analyzer['graph'], l[k])
-        a = 0
-        while a<len(df['visited']['table']['elements']):
-            if estacion == df['visited']['table']['elements'][a]['key']:
-                if df['visited']['table']['elements'][a]['value']['edgeTo'] == df['source']:
-                    rutas_unicas.append(df['source'])
-                
-                a += 0
-        
-        
-        print(df)
-        if 1==2:
-            k += 1
+        camino = dfs.pathTo(df,l[b])
+        #if camino['size'] == 2:
+          #  peso_1 = gr.getEdge(analyzer['graph'],camino['first']['info'],camino['first']['info']['next']['info'])
+         #   print(peso_1)
+        #else:
+            
+        #print(camino)
+        #a = 0
+        #while a<len(df['visited']['table']['elements']):
+         #   if estacion == df['visited']['table']['elements'][a]['key']:
+          #      if df['visited']['table']['elements'][a]['value']['edgeTo'] == df['source']:
+           #         rutas_unicas.append(df['source'])
+        k += 1
+        b += 1
     
     
-    return 'Hola'
+    return camino
 
 
 def connectedComponents(analyzer):

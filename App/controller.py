@@ -76,8 +76,8 @@ def loadFiles(analyzer,archive):
 #  Funciones para consultas
 # ___________________________________________________
 
-def ruta_ciclica(analyzer, estacion):
-    return model.ruta_ciclica(analyzer, estacion)
+def ruta_ciclica(analyzer, estacion, tiempo):
+    return model.ruta_ciclica(analyzer, estacion, tiempo)
     
 def totalStops(analyzer):
     """
