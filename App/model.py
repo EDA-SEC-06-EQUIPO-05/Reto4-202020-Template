@@ -61,7 +61,8 @@ def newAnalyzerC():
                     'stops': None,
                     'components': None,
                     'connections': None,
-                    'ages': None
+                    'agesOrigen': None,
+                    'agesDestino':None
                     }
 
         analyzer["graph"]= gr.newGraph(datastructure='ADJ_LIST',
@@ -78,9 +79,13 @@ def newAnalyzerC():
                                               size=1000,
                                               comparefunction=compareStopIds)
 
-        analyzer['ages'] = m.newMap(numelements=14000,
+        analyzer['agesOrigen'] = m.newMap(numelements=14000,
                                      maptype='PROBING',
-                                     comparefunction=compareAges)                
+                                     comparefunction=compareAges)    
+
+        analyzer['agesDestino'] = m.newMap(numelements=14000,
+                                     maptype='PROBING',
+                                     comparefunction=compareAges)    
 
         return analyzer
     except Exception as exp:
@@ -92,19 +97,33 @@ def addTrip(analyzer, viaje):
     origen = viaje["start station id"]
     destino = viaje["end station id"]
     duracion = int(viaje["tripduration"])
+    edad= 2018 - int(viaje["birth year"])
     addStation(analyzer, origen)
     addStation(analyzer, destino)
     addConnectionC(analyzer, origen, destino, duracion)
-    addAges(analyzer, origen)
-    addAges(analyzer, destino)
+    stopAges(analyzer, origen, edad, 1)
+    stopAges(analyzer, destino, edad, 2)
 
 def addStation(analyzer, stationID):
     if not gr.containsVertex(analyzer["graph"], stationID):
         gr.insertVertex(analyzer["graph"], stationID)
     return analyzer
 
-def addAges(analyzer, ruta):
-
+def stopAges(analyzer, station, age, ori_des):
+    """
+    Agrega a una estacion, una ruta que es servida en ese paradero
+    """
+    if ori_des==1:
+        entry = m.get(analyzer['agesOrigen'], station)
+    elif ori_des==2:
+        entry = m.get(analyzer['agesDestino'], station)
+    if entry is None:
+        lstages = lt.newList(cmpfunction=compareAges)
+        lt.addLast(lstages, age)
+        m.put(analyzer['stops'], station, lstages)
+    else:
+        lstroutes = entry['value']
+        lt.addLast(lstroutes, age)
     return analyzer
 
 def addStopConnection(analyzer, lastservice, service):
@@ -363,7 +382,6 @@ def estacionesCriticas(analyzer):
     entradasOrg= sel.selectionSort(entradasConcurridas,lessequal)
     salidasOrg= sel.selectionSort(salidasConcurridas,lessequal)
     solitariasOrg= sel.selectionSort(estacionesSolitarias,lessequal)
-    print(entradasOrg)
 
     for conteo in range(0,3):
         if entrada == lt.getElement(entradasOrg, conteo):
@@ -380,6 +398,8 @@ def estacionesCriticas(analyzer):
         lt.removeLast(listaSolitarias)
 
     return (listaEntrada, listaSalida, listaSolitarias)
+
+def estacionesPopularesporEdades(analyzer, edad):
     
 # ==============================
 # Funciones Helper

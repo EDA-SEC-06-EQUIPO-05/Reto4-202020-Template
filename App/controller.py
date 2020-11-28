@@ -156,3 +156,8 @@ def criticalStations(analyzer):
 
     estaciones= model.estacionesCriticas(analyzer)
     return estaciones
+
+def popularStationsbyAge(analyzer, age):
+
+    tuplaEstaciones= model.estacionesPopularesporEdades(analyzer, age)
+    return tuplaEstaciones

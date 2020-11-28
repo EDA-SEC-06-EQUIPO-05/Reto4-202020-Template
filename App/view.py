@@ -95,6 +95,11 @@ def optionFive():
     resultado= controller.criticalStations(cont)
     print(resultado)
 
+def optionSix():
+    print("Rangos de edades: 0-10 años, 11-20 años, 21-30 años, 31-40 años, 41-50 años, 51-60 años, 60+ (Si es 60 o mayor solo escriba 60). ")
+    edad = input("Ingrese su rango de edad: ")
+    estaciones= controller.popularStationsbyAge(cont, edad)
+
 
 """
 Menu principal
@@ -121,6 +126,14 @@ while True:
 
     elif int(inputs[0]) == 5:
         executiontime = timeit.timeit(optionFive, number=1)
+        print("Tiempo de ejecución: " + str(executiontime))
+    
+    elif int(inputs[0]) == 6:
+        executiontime = timeit.timeit(optionSix, number=1)
+        print("Tiempo de ejecución: " + str(executiontime))
+
+    elif int(inputs[0]) == 7:
+        executiontime = timeit.timeit(optionSeven, number=1)
         print("Tiempo de ejecución: " + str(executiontime))
 
     else:
