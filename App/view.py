@@ -43,8 +43,7 @@ operación seleccionada.
 #  Variables
 # ___________________________________________________
 
-servicefile = '201801-5-citibike-tripdata.csv'
-initialStation = None
+servicefile = '201801-2-citibike-tripdata.csv'
 recursionLimit = 20000
 
 # ___________________________________________________
@@ -59,6 +58,9 @@ def printMenu():
     print("3- Calcular componentes conectados")
     print('4- Calcular la ruta circular')
     print("5- Buscar estaciones criticas")
+    print("6- Ruta turistica por resistencia")
+    print('7- Recomendador de rutas')
+    print("8- Ruta de interes turistico")
     print("0- Salir")
     print("*******************************************")
 
@@ -93,12 +95,24 @@ def optionFour():
 def optionFive():
 
     resultado= controller.criticalStations(cont)
-    print(resultado)
+    print("Las estaciones mas transitadas de partida son "+resultado[0]+"\n")
+    print("Las estaciones mas transitadas de llegada son "+resultado[1]+"\n")
+    print("Las estaciones menos transitadas son "+resultado[2]+"\n")
 
 def optionSix():
-    print("Rangos de edades: 0-10 años, 11-20 años, 21-30 años, 31-40 años, 41-50 años, 51-60 años, 60+ (Si es 60 o mayor solo escriba 60). ")
-    edad = input("Ingrese su rango de edad: ")
-    estaciones= controller.popularStationsbyAge(cont, edad)
+
+    print("resultado")
+
+def optionSeven():
+    print("Rango de edades: Digite un número según su rango de edad.")
+    print('0-10 años: 1\n11-20 años: 2\n21-30 años: 3\n31-40 años: 4\n41-50 años: 5\n51-60 años: 6\n60 años o mayor: 7')
+    opcionEdad = input("Ingrese su rango de edad: ")
+    estaciones= controller.popularStationsbyAge(cont, opcionEdad)
+    estInicial= controller.minimumCostPaths(cont,estaciones[0][0])
+    caminoMasCorto= controller.minimumCostPath(cont,estaciones[1][0])
+    print("La estación de la que mas personas de esa edad salen es: "+estaciones[0][0]+", con un registro de "+str(estaciones[0][1])+" personas. \n")
+    print("La estación a la que mas llegan personas de esa edad es: "+estaciones[1][0]+", con un registro de "+str(estaciones[1][1])+" personas. \n")
+    print("El camino mas corto desde "+estaciones[0][0]+ "hasta la estacion" +estaciones[1][0]+" es: \n"+caminoMasCorto)
 
 
 """

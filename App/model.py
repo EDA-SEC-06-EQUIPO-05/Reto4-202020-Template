@@ -61,6 +61,7 @@ def newAnalyzerC():
                     'stops': None,
                     'components': None,
                     'connections': None,
+                    'paths': None,
                     'agesOrigen': None,
                     'agesDestino':None
                     }
@@ -124,6 +125,7 @@ def stopAges(analyzer, station, age, ori_des):
     else:
         lstroutes = entry['value']
         lt.addLast(lstroutes, age)
+    print(entry)
     return analyzer
 
 def addStopConnection(analyzer, lastservice, service):
@@ -399,12 +401,61 @@ def estacionesCriticas(analyzer):
 
     return (listaEntrada, listaSalida, listaSolitarias)
 
-def estacionesPopularesporEdades(analyzer, edad):
-    
+def estacionesPopularesporEdadesOrigen(analyzer, edad1, edad2):
+    lstvert = m.keySet(analyzer['agesOrigen'])
+    itlstvert = it.newIterator(lstvert)
+    estacionActual= ""
+    numeroActual= 0
+    estacionMayorOrigen= ""
+    numeroMayorOrigen= 0
+    while it.hasNext(itlstvert):
+        key = it.next(itlstvert)
+        lstroutes = m.get(analyzer['agesOrigen'], key)['value']
+        routeiterator = it.newIterator(lstroutes)
+        while it.hasNext(routeiterator):
+            value= it.next(routeiterator)
+            if edad2==0:
+                if value >= edad1:
+                    numeroActual+= 1
+            else:
+                if value >= edad1 and value <= edad2:
+                    numeroActual+= 1
+        if numeroActual>numeroMayorOrigen:
+            estacionMayorOrigen= key
+            numeroMayorOrigen= numeroActual
+
+    return (estacionMayorOrigen,numeroMayorOrigen)
+
+
+def estacionesPopularesporEdadesDestino(analyzer, edad1, edad2):
+    lstvert = m.keySet(analyzer['agesDestino'])
+    itlstvert = it.newIterator(lstvert)
+    estacionActual= ""
+    numeroActual= 0
+    estacionMayorDestino= ""
+    numeroMayorDestino= 0
+    while it.hasNext(itlstvert):
+        key = it.next(itlstvert)
+        lstroutes = m.get(analyzer['agesDestino'], key)['value']
+        routeiterator = it.newIterator(lstroutes)
+        while it.hasNext(routeiterator):
+            value= it.next(routeiterator)
+            if edad2==0:
+                if value >= edad1:
+                    numeroActual+= 1
+            else:
+                if value >= edad1 and value <= edad2:
+                    numeroActual+= 1
+        if numeroActual>numeroMayorDestino:
+            estacionMayorDestino= key
+            numeroMayorDestino= numeroActual
+            
+    return (estacionMayorDestino,numeroMayorDestino)
+
+
 # ==============================
 # Funciones Helper
 # ==============================
-
 def cleanServiceDistance(lastservice, service):
     """
     En caso de que el archivo tenga un espacio en la

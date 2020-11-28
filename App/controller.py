@@ -84,12 +84,13 @@ def loadTrips(analyzer):
             loadFiles(analyzer, nombre)
     return analyzer
 
-def loadFiles(analyzer,archivo):
-    archivo = cf.data_dir + archivo
+def loadFiles(analyzer,archive):
+    archivo = cf.data_dir + archive
     input_archivo = csv.DictReader(open(archivo, encoding="utf-8"),
                                 delimiter=",")
     for viaje in input_archivo:
-        model.addTrip(analyzer,viaje)
+        if viaje is not None:
+            model.addTrip(analyzer,viaje)
     return analyzer
 
 
@@ -157,7 +158,33 @@ def criticalStations(analyzer):
     estaciones= model.estacionesCriticas(analyzer)
     return estaciones
 
-def popularStationsbyAge(analyzer, age):
+def popularStationsbyAge(analyzer, ageOption):
 
-    tuplaEstaciones= model.estacionesPopularesporEdades(analyzer, age)
-    return tuplaEstaciones
+    age1= 0
+    age2= 0
+    if ageOption==1:
+        age1= 0
+        age2= 10
+    elif ageOption==2:
+        age1= 11
+        age2= 20
+    elif ageOption==3:
+        age1= 21
+        age2= 30
+    elif ageOption==4:
+        age1= 31
+        age2= 40
+    elif ageOption==5:
+        age1= 41
+        age2= 50
+    elif ageOption==6:
+        age1= 51
+        age2= 60
+    elif ageOption==7:
+        age1= 60
+        age2= 0
+
+    tuplaEstacionesOrigen= model.estacionesPopularesporEdadesOrigen(analyzer, age1, age2)
+    tuplaEstacionesDestino= model.estacionesPopularesporEdadesDestino(analyzer, age1, age2)
+
+    return (tuplaEstacionesOrigen,tuplaEstacionesDestino)
