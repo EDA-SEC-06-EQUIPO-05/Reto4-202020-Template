@@ -63,7 +63,9 @@ def newAnalyzerC():
                     'connections': None,
                     'paths': None,
                     'agesOrigen': None,
-                    'agesDestino':None
+                    'agesDestino': None,
+                    'latitud': None,
+                    'longitud': None
                     }
 
         analyzer["graph"]= gr.newGraph(datastructure='ADJ_LIST',
@@ -86,7 +88,14 @@ def newAnalyzerC():
 
         analyzer['agesDestino'] = m.newMap(numelements=14000,
                                      maptype='PROBING',
-                                     comparefunction=compareAges)    
+                                     comparefunction=compareAges)  
+
+        analyzer['latitud'] = m.newMap(numelements=14000,
+                                     maptype='PROBING',
+                                     comparefunction=compareAges)   
+        analyzer['longitud'] = m.newMap(numelements=14000,
+                                     maptype='PROBING',
+                                     comparefunction=compareAges)   
 
         return analyzer
     except Exception as exp:
@@ -99,11 +108,18 @@ def addTrip(analyzer, viaje):
     destino = viaje["end station id"]
     duracion = int(viaje["tripduration"])
     edad= 2018 - int(viaje["birth year"])
-    addStation(analyzer, origen)
-    addStation(analyzer, destino)
-    addConnectionC(analyzer, origen, destino, duracion)
-    stopAges(analyzer, origen, edad, 1)
-    stopAges(analyzer, destino, edad, 2)
+    latitudOr= float(viaje["start station latitude"])
+    longitudOr= float(viaje["start station longitude"])
+    latitudDe= float(viaje["end station latitude"])
+    longitudDe= float(viaje["end station longitude"])
+    if origen != destino:
+        addStation(analyzer, origen)
+        addStation(analyzer, destino)
+        addConnectionC(analyzer, origen, destino, duracion)
+        stopAges(analyzer, origen, edad, 1)
+        stopAges(analyzer, destino, edad, 2)
+        stopdirections(analyzer, origen, latitudOr, longitudOr)
+        stopdirections(analyzer, destino, latitudDe, longitudDe)
 
 def addStation(analyzer, stationID):
     if not gr.containsVertex(analyzer["graph"], stationID):
@@ -125,83 +141,29 @@ def stopAges(analyzer, station, age, ori_des):
     else:
         lstroutes = entry['value']
         lt.addLast(lstroutes, age)
-    print(entry)
     return analyzer
 
-def addStopConnection(analyzer, lastservice, service):
-    """
-    Adiciona las estaciones al grafo como vertices y arcos entre las
-    estaciones adyacentes.
-
-    Los vertices tienen por nombre el identificador de la estacion
-    seguido de la ruta que sirve.  Por ejemplo:
-
-    75009-10
-
-    Si la estacion sirve otra ruta, se tiene: 75009-101
-    """
-    try:
-        origin = formatVertex(lastservice)
-        destination = formatVertex(service)
-        cleanServiceDistance(lastservice, service)
-        distance = float(service['Distance']) - float(lastservice['Distance'])
-        addStop(analyzer, origin)
-        addStop(analyzer, destination)
-        addConnection(analyzer, origin, destination, distance)
-        addRouteStop(analyzer, service)
-        addRouteStop(analyzer, lastservice)
-        return analyzer
-    except Exception as exp:
-        error.reraise(exp, 'model:addStopConnection')
-
-def addStop(analyzer, stopid):
-    """
-    Adiciona una estación como un vertice del grafo
-    """
-    try:
-        if not gr.containsVertex(analyzer['connections'], stopid):
-            gr.insertVertex(analyzer['connections'], stopid)
-        return analyzer
-    except Exception as exp:
-        error.reraise(exp, 'model:addstop')
-
-
-def addRouteStop(analyzer, service):
+def stopdirections(analyzer, station, latitude, longitude):
     """
     Agrega a una estacion, una ruta que es servida en ese paradero
     """
-    entry = m.get(analyzer['stops'], service['BusStopCode'])
-    if entry is None:
-        lstroutes = lt.newList(cmpfunction=compareroutes)
-        lt.addLast(lstroutes, service['ServiceNo'])
-        m.put(analyzer['stops'], service['BusStopCode'], lstroutes)
+    entryla = m.get(analyzer['latitud'], station)
+    entrylo = m.get(analyzer['longitud'], station)
+    if entryla is None:
+        lstagesa = lt.newList(cmpfunction=compareAges)
+        lt.addLast(lstagesa, latitude)
+        m.put(analyzer['latitud'], station, lstagesa)
     else:
-        lstroutes = entry['value']
-        info = service['ServiceNo']
-        if not lt.isPresent(lstroutes, info):
-            lt.addLast(lstroutes, info)
+        lstroutesa = entryla['value']
+        lt.addLast(lstroutesa, latitude)
+    if entrylo is None:
+        lstageso = lt.newList(cmpfunction=compareAges)
+        lt.addLast(lstageso, longitude)
+        m.put(analyzer['longitud'], station, lstageso)
+    else:
+        lstrouteso = entrylo['value']
+        lt.addLast(lstrouteso, longitude)
     return analyzer
-
-def addRouteConnections(analyzer):
-    """
-    Por cada vertice (cada estacion) se recorre la lista
-    de rutas servidas en dicha estación y se crean
-    arcos entre ellas para representar el cambio de ruta
-    que se puede realizar en una estación.
-    """
-    lststops = m.keySet(analyzer['stops'])
-    stopsiterator = it.newIterator(lststops)
-    while it.hasNext(stopsiterator):
-        key = it.next(stopsiterator)
-        lstroutes = m.get(analyzer['stops'], key)['value']
-        prevrout = None
-        routeiterator = it.newIterator(lstroutes)
-        while it.hasNext(routeiterator):
-            route = key + '-' + it.next(routeiterator)
-            if prevrout is not None:
-                addConnection(analyzer, prevrout, route, 0)
-                addConnection(analyzer, route, prevrout, 0)
-            prevrout = route
 
 def addRouteConnectionsC(analyzer):
     """
@@ -223,16 +185,6 @@ def addRouteConnectionsC(analyzer):
                 addConnectionC(analyzer, prevrout, route, 0)
                 addConnectionC(analyzer, route, prevrout, 0)
             prevrout = route
-
-
-def addConnection(analyzer, origin, destination, distance):
-    """
-    Adiciona un arco entre dos estaciones
-    """
-    edge = gr.getEdge(analyzer['connections'], origin, destination)
-    if edge is None:
-        gr.addEdge(analyzer['connections'], origin, destination, distance)
-    return analyzer
 
 def addConnectionC(analyzer, origin, destination, distance):
     """
@@ -452,6 +404,12 @@ def estacionesPopularesporEdadesDestino(analyzer, edad1, edad2):
             
     return (estacionMayorDestino,numeroMayorDestino)
 
+def stationbyLocation(analyzer, latitude1, longitude1, latitude2, longitude2):
+
+    lstverta = m.keySet(analyzer['latitude'])
+    lstverto = m.keySet(analyzer['longitude'])
+    itlstverta = it.newIterator(lstverta)
+    itlstverto = it.newIterator(lstverto)
 
 # ==============================
 # Funciones Helper

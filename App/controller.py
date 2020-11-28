@@ -55,28 +55,6 @@ def init():
 #  Funciones para la carga de datos y almacenamiento
 #  de datos en los modelos
 # ___________________________________________________
-def loadServices(analyzer, servicesfile):
-    """
-    Carga los datos de los archivos CSV en el modelo.
-    Se crea un arco entre cada par de estaciones que
-    pertenecen al mismo servicio y van en el mismo sentido.
-
-    addRouteConnection crea conexiones entre diferentes rutas
-    servidas en una misma estación.
-    """
-    servicesfile = cf.data_dir + servicesfile
-    input_file = csv.DictReader(open(servicesfile, encoding="utf-8"),
-                                delimiter=",")
-    lastservice = None
-    for service in input_file:
-        if lastservice is not None:
-            sameservice = lastservice['ServiceNo'] == service['ServiceNo']
-            samedirection = lastservice['Direction'] == service['Direction']
-            if sameservice and samedirection:
-                model.addStopConnection(analyzer, lastservice, service)
-        lastservice = service
-    model.addRouteConnections(analyzer)
-    return analyzer
 
 def loadTrips(analyzer):
     for nombre in os.listdir(cf.data_dir):
@@ -89,7 +67,7 @@ def loadFiles(analyzer,archive):
     input_archivo = csv.DictReader(open(archivo, encoding="utf-8"),
                                 delimiter=",")
     for viaje in input_archivo:
-        if viaje is not None:
+        if viaje != None and viaje != "" and viaje != " ":
             model.addTrip(analyzer,viaje)
     return analyzer
 
@@ -188,3 +166,7 @@ def popularStationsbyAge(analyzer, ageOption):
     tuplaEstacionesDestino= model.estacionesPopularesporEdadesDestino(analyzer, age1, age2)
 
     return (tuplaEstacionesOrigen,tuplaEstacionesDestino)
+
+def localizacion(analyzer, lat1, lon1, lat2, lon2):
+
+    funcion= model.stationbyLocation()

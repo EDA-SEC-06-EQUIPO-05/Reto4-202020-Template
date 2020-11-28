@@ -43,7 +43,6 @@ operación seleccionada.
 #  Variables
 # ___________________________________________________
 
-servicefile = '201801-2-citibike-tripdata.csv'
 recursionLimit = 20000
 
 # ___________________________________________________
@@ -114,6 +113,14 @@ def optionSeven():
     print("La estación a la que mas llegan personas de esa edad es: "+estaciones[1][0]+", con un registro de "+str(estaciones[1][1])+" personas. \n")
     print("El camino mas corto desde "+estaciones[0][0]+ "hasta la estacion" +estaciones[1][0]+" es: \n"+caminoMasCorto)
 
+def optionEight():
+    lato= input("Inserte la latitud del origen: ")
+    lono= input("Ingrese la longitud del origen: ")
+    latd= input("Inserte la latitud del destino: ")
+    lond= input("Ingrese la longitud del destino: ")
+    funcion= controller.localizacion(cont,lato,lono,latd,lond)
+    print(funcion)
+
 
 """
 Menu principal
@@ -148,6 +155,10 @@ while True:
 
     elif int(inputs[0]) == 7:
         executiontime = timeit.timeit(optionSeven, number=1)
+        print("Tiempo de ejecución: " + str(executiontime))
+
+    elif int(inputs[0]) == 8:
+        executiontime = timeit.timeit(optionEight, number=1)
         print("Tiempo de ejecución: " + str(executiontime))
 
     else:
